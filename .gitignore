@@ -1,0 +1,6 @@
+node_modules/
+database/seating.sqlite
+uploads/*.xlsx
+uploads/*.xls
+.env
+*.log

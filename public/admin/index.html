@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — Exam Seating</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #21263a;
+      --border: rgba(255,255,255,0.07);
+      --accent: #4f8ef7;
+      --accent-glow: rgba(79,142,247,0.15);
+      --gold: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --muted2: #374151;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login Screen ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at center, #1a1f35 0%, #0f1117 70%);
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-logo .icon {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--accent), #3b6fe8);
+      border-radius: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 24px rgba(79,142,247,0.3);
+    }
+
+    .login-logo h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .login-logo p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"], input[type="password"], input[type="date"], input[type="email"], select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--muted); }
+
+    select option { background: var(--surface); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #3b6fe8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,142,247,0.3); }
+
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { filter: brightness(1.1); }
+
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { filter: brightness(1.1); }
+
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface2); }
+
+    .btn-full { width: 100%; justify-content: center; padding: 14px; font-size: 15px; }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .login-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #f87171;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ── App Layout ── */
+    #app { display: none; min-height: 100vh; }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-logo .icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), #3b6fe8);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .sidebar-logo span {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+    .nav-section { margin-bottom: 24px; }
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 8px;
+      margin-bottom: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
+
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .admin-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .admin-avatar {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), #3b6fe8);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .admin-info { flex: 1; }
+    .admin-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .admin-role { font-size: 10px; color: var(--muted); }
+
+    /* ── Main Content ── */
+    .content {
+      flex: 1;
+      margin-left: 240px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title h2 { font-size: 18px; font-weight: 700; }
+    .topbar-title p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    /* ── Page Sections ── */
+    .page-section { display: none; padding: 28px; }
+    .page-section.active { display: block; }
+
+    /* ── Stats Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); }
+
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; }
+    .stat-value { font-size: 36px; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    .stat-card.blue .stat-value { color: var(--accent); }
+    .stat-card.green .stat-value { color: var(--success); }
+    .stat-card.gold .stat-value { color: var(--gold); }
+    .stat-card.purple .stat-value { color: #a78bfa; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body { padding: 22px; }
+
+    /* ── Upload Form ── */
+    .upload-zone {
+      border: 2px dashed rgba(79,142,247,0.3);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 40px; margin-bottom: 10px; }
+    .upload-text { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .upload-sub { font-size: 12px; color: var(--muted); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--surface2);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toggle-label { font-size: 13px; font-weight: 600; }
+    .toggle-sub { font-size: 11px; color: var(--muted); }
+
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--muted2);
+      border-radius: 24px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--success); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .badge-success { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .badge-info { background: rgba(79,142,247,0.15); color: var(--accent); }
+    .badge-warning { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .badge-morning { background: rgba(245,158,11,0.1); color: #fbbf24; }
+    .badge-evening { background: rgba(139,92,246,0.1); color: #a78bfa; }
+
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* ── Alert ── */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .alert-danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .alert-info { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.3); color: #93c5fd; }
+
+    /* ── Settings ── */
+    .settings-group { margin-bottom: 24px; }
+    .settings-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Search Result ── */
+    .search-result-card {
+      background: var(--surface2);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .result-item { }
+    .result-item-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .result-item-value { font-size: 16px; font-weight: 700; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── Today Banner ── */
+    .today-banner {
+      background: linear-gradient(135deg, rgba(79,142,247,0.1), rgba(79,142,247,0.05));
+      border: 1px solid rgba(79,142,247,0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .today-icon { font-size: 28px; }
+    .today-text h3 { font-size: 15px; font-weight: 700; }
+    .today-text p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Log ── */
+    .log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .log-dot.upload { background: var(--success); }
+    .log-dot.delete { background: var(--danger); }
+    .log-dot.activate { background: var(--accent); }
+    .log-dot.deactivate { background: var(--muted); }
+    .log-content { flex: 1; }
+    .log-action { font-size: 13px; font-weight: 600; }
+    .log-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .log-time { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-text { font-size: 14px; }
+
+    /* ── Overlay (mobile sidebar) ── */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .content { margin-left: 0; }
+      .hamburger { display: block; }
+      .form-row, .form-row.three { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+      .topbar { padding: 14px 18px; }
+      .page-section { padding: 18px; }
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-top: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      animation: progress 1.5s ease-in-out infinite;
+    }
+    @keyframes progress {
+      0% { width: 0%; margin-left: 0; }
+      50% { width: 60%; margin-left: 20%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🛡️</div>
+      <h2>Admin Panel</h2>
+      <p>Exam Seating Management System</p>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="Enter username" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">
+      Sign In →
+    </button>
+    <p style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted)">
+      <a href="/" style="color:var(--accent);text-decoration:none">← Back to Student Portal</a>
+    </p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="icon">🎓</div>
+          <span>Seating Admin</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-label">Main</div>
+          <button class="nav-item active" onclick="showPage('dashboard', this)">
+            <span class="nav-icon">📊</span> Dashboard
+          </button>
+          <button class="nav-item" onclick="showPage('upload', this)">
+            <span class="nav-icon">📤</span> Upload Plan
+          </button>
+          <button class="nav-item" onclick="showPage('plans', this)">
+            <span class="nav-icon">📋</span> Manage Plans
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Tools</div>
+          <button class="nav-item" onclick="showPage('search', this)">
+            <span class="nav-icon">🔍</span> Student Search
+          </button>
+          <button class="nav-item" onclick="showPage('logs', this)">
+            <span class="nav-icon">📝</span> Activity Logs
+          </button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-label">Config</div>
+          <button class="nav-item" onclick="showPage('settings', this)">
+            <span class="nav-icon">⚙️</span> Settings
+          </button>
+          <button class="nav-item" onclick="showPage('password', this)">
+            <span class="nav-icon">🔒</span> Change Password
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-badge">
+          <div class="admin-avatar" id="admin-avatar">A</div>
+          <div class="admin-info">
+            <div class="admin-name" id="admin-name-display">Admin</div>
+            <div class="admin-role">Administrator</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:12px" onclick="logout()">
+          🚪 Sign Out
+        </button>
+        <div style="text-align:center;margin-top:10px">
+          <a href="/" style="font-size:11px;color:var(--muted);text-decoration:none">🔗 Student Portal</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="hamburger" onclick="openSidebar()">☰</button>
+          <div class="topbar-title">
+            <h2 id="page-title">Dashboard</h2>
+            <p id="page-sub">Overview &amp; Statistics</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="today-date" style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace"></span>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="page-section active" id="page-dashboard">
+        <div class="today-banner" id="today-banner" style="display:none">
+          <div class="today-icon">📅</div>
+          <div class="today-text">
+            <h3 id="today-plan-text">Active Plan Today</h3>
+            <p id="today-plan-sub">Plan details loading...</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-label">Total Uploads</div>
+            <div class="stat-value" id="stat-uploads">—</div>
+            <div class="stat-sub">Seating plans uploaded</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Active Plans</div>
+            <div class="stat-value" id="stat-active">—</div>
+            <div class="stat-sub">Currently published</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value" id="stat-students">—</div>
+            <div class="stat-sub">Records in database</div>
+          </div>
+          <div class="stat-card purple">
+            <div class="stat-label">Exam Rooms</div>
+            <div class="stat-value" id="stat-rooms">—</div>
+            <div class="stat-sub">Unique rooms assigned</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📝 Recent Activity</div>
+          </div>
+          <div class="card-body" id="recent-logs">
+            <div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No recent activity</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="page-section" id="page-upload">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📤 Upload Seating Plan</div>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-success" id="upload-success"></div>
+            <div class="alert alert-danger" id="upload-error"></div>
+
+            <div class="form-row" style="margin-bottom:16px">
+              <div class="form-group" style="margin:0">
+                <label>Exam Date</label>
+                <input type="date" id="upload-date"/>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Session</label>
+                <select id="upload-session">
+                  <option value="">Select Session</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Evening">Evening</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Excel File (.xlsx / .xls)</label>
+              <div class="upload-zone" id="upload-zone">
+                <input type="file" id="upload-file" accept=".xlsx,.xls" onchange="fileSelected(this)"/>
+                <div class="upload-icon">📊</div>
+                <div class="upload-text" id="upload-file-name">Click to choose file or drag & drop</div>
+                <div class="upload-sub">Excel format with sheet names as room numbers (e.g., B007, B013)</div>
+              </div>
+              <div class="progress-bar" id="progress-bar"><div class="progress-fill"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Activate Immediately</div>
+                <div class="toggle-sub">Make this plan visible to students right away</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="upload-active" checked/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="uploadPlan()" id="upload-btn" style="flex:1;justify-content:center;padding:14px">
+                📤 Upload & Parse
+              </button>
+              <button class="btn btn-ghost" onclick="clearUploadForm()">✕ Clear</button>
+            </div>
+
+            <div id="upload-preview" style="display:none;margin-top:20px">
+              <div class="card" style="margin:0">
+                <div class="card-header" style="background:rgba(16,185,129,0.05)">
+                  <div class="card-title" style="color:var(--success)">✅ Upload Successful</div>
+                </div>
+                <div class="card-body">
+                  <div class="result-grid" id="preview-stats"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Excel Format Guide -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📖 Excel Format Guide</div>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Your Excel file should follow this structure:</p>
+            <div style="display:grid;gap:10px">
+              <div style="background:var(--surface2);border-radius:8px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:6px">📋 Sheet Names = Room Numbers</div>
+                <div style="font-size:12px;color:var(--muted)">Each sheet is named after a room (e.g., B007, B013, C301). Summary sheets are automatically skipped.</div>
+              </div>
+              <div style="background:var(--surface2);border-radius:8px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px">🪑 Inside Each Sheet</div>
+                <div style="font-size:12px;color:var(--muted)">Row 5 (0-indexed) contains column headers like ROW1, ROW3, ROW4... Data starts 2 rows below. Enrollment numbers fill the columns.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGE PLANS -->
+      <div class="page-section" id="page-plans">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 All Seating Plans</div>
+            <button class="btn btn-ghost" onclick="loadPlans()" style="font-size:12px">↻ Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Session</th>
+                  <th>File</th>
+                  <th>Students</th>
+                  <th>Uploaded</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="plans-tbody">
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENT SEARCH -->
+      <div class="page-section" id="page-search">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🔍 Manual Student Search</div>
+            <span style="font-size:11px;color:var(--muted)">Searches all plans (active & inactive)</span>
+          </div>
+          <div class="card-body">
+            <div class="form-row" style="margin-bottom:16px">
+              <div class="form-group" style="margin:0">
+                <label>Enrollment Number</label>
+                <input type="text" id="admin-search-enroll" placeholder="e.g. 240160226002" autocomplete="off"/>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label>Filter by Date (optional)</label>
+                <input type="date" id="admin-search-date"/>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="adminSearch()" style="padding:12px 24px">
+              🔍 Search
+            </button>
+          </div>
+        </div>
+
+        <div id="admin-search-result"></div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="page-section" id="page-logs">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📝 Activity Logs</div>
+            <button class="btn btn-ghost" onclick="loadLogs()" style="font-size:12px">↻ Refresh</button>
+          </div>
+          <div class="card-body" id="logs-body">
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page-section" id="page-settings">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ System Settings</div></div>
+          <div class="card-body">
+            <div class="alert alert-success" id="settings-success"></div>
+            <div class="alert alert-danger" id="settings-error"></div>
+
+            <div class="settings-group">
+              <div class="settings-label">Portal Branding</div>
+              <div class="form-group">
+                <label>Portal Title</label>
+                <input type="text" id="set-portal-title" placeholder="Exam Seating Plan Portal"/>
+              </div>
+              <div class="form-group">
+                <label>Institution Name</label>
+                <input type="text" id="set-institution" placeholder="University Examination Cell"/>
+              </div>
+              <div class="form-group">
+                <label>Contact Information</label>
+                <input type="text" id="set-contact" placeholder="email@university.edu | +91-XXXXXXXXXX"/>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-label">Student Messages</div>
+              <div class="form-group">
+                <label>"Not Found" Message</label>
+                <textarea id="set-not-found" rows="3" style="resize:vertical;font-family:'Sora',sans-serif;font-size:13px"></textarea>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">Shown when a student's enrollment number is not found</p>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveSettings()" style="padding:12px 28px">
+              💾 Save Settings
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div class="page-section" id="page-password">
+        <div class="card" style="max-width:460px">
+          <div class="card-header"><div class="card-title">🔒 Change Password</div></div>
+          <div class="card-body">
+            <div class="alert alert-success" id="pwd-success"></div>
+            <div class="alert alert-danger" id="pwd-error"></div>
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="pwd-current" placeholder="Enter current password"/>
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="pwd-new" placeholder="At least 6 characters"/>
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="pwd-confirm" placeholder="Repeat new password"/>
+            </div>
+            <button class="btn btn-primary" onclick="changePassword()" style="padding:12px 28px">
+              🔒 Update Password
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<script>
+  let token = localStorage.getItem('admin_token');
+  let adminUsername = localStorage.getItem('admin_username') || 'Admin';
+
+  const pageTitles = {
+    dashboard: ['Dashboard', 'Overview & Statistics'],
+    upload: ['Upload Plan', 'Parse & Store Excel Seating Plans'],
+    plans: ['Manage Plans', 'Activate, Deactivate & Delete'],
+    search: ['Student Search', 'Manual lookup across all plans'],
+    logs: ['Activity Logs', 'Recent admin actions'],
+    settings: ['Settings', 'Portal configuration'],
+    password: ['Change Password', 'Update admin credentials']
+  };
+
+  function init() {
+    if (token) showApp();
+    document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+    updateClock();
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('today-date').textContent = now.toLocaleDateString('en-IN', {
+      weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+
+  async function doLogin() {
+    const username = document.getElementById('login-user').value.trim();
+    const password = document.getElementById('login-pass').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn');
+
+    if (!username || !password) {
+      showEl(errEl, 'Please enter username and password.');
+      return;
+    }
+
+    btn.textContent = 'Signing in…'; btn.disabled = true;
+    errEl.style.display = 'none';
+
+    try {
+      const res = await api('/api/admin/login', 'POST', { username, password }, false);
+      token = res.token;
+      adminUsername = res.username;
+      localStorage.setItem('admin_token', token);
+      localStorage.setItem('admin_username', adminUsername);
+      showApp();
+    } catch (err) {
+      showEl(errEl, err.message || 'Invalid credentials.');
+    } finally {
+      btn.textContent = 'Sign In →'; btn.disabled = false;
+    }
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('admin-name-display').textContent = adminUsername;
+    document.getElementById('admin-avatar').textContent = adminUsername.charAt(0).toUpperCase();
+    loadDashboard();
+  }
+
+  function logout() {
+    token = null;
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_username');
+    location.reload();
+  }
+
+  function showPage(name, el) {
+    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    if (el) el.classList.add('active');
+    const [title, sub] = pageTitles[name] || [name, ''];
+    document.getElementById('page-title').textContent = title;
+    document.getElementById('page-sub').textContent = sub;
+    closeSidebar();
+
+    if (name === 'dashboard') loadDashboard();
+    else if (name === 'plans') loadPlans();
+    else if (name === 'logs') loadLogs();
+    else if (name === 'settings') loadSettings();
+  }
+
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  // ── API Helper ──
+  async function api(url, method='GET', body=null, auth=true) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (auth && token) headers['Authorization'] = `Bearer ${token}`;
+    const opts = { method, headers };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  // ── Dashboard ──
+  async function loadDashboard() {
+    try {
+      const d = await api('/api/admin/stats');
+      document.getElementById('stat-uploads').textContent = d.totalUploads;
+      document.getElementById('stat-active').textContent = d.activeUploads;
+      document.getElementById('stat-students').textContent = d.totalStudents.toLocaleString();
+      document.getElementById('stat-rooms').textContent = d.totalRooms;
+
+      if (d.todayPlan) {
+        const b = document.getElementById('today-banner');
+        b.style.display = 'flex';
+        document.getElementById('today-plan-text').textContent = `Active Plan: ${d.todayPlan.session} Session`;
+        document.getElementById('today-plan-sub').textContent = `${formatDate(d.today)} · ${d.todayPlan.total_students} students · ${d.todayPlan.file_name}`;
+      }
+
+      const logsEl = document.getElementById('recent-logs');
+      if (d.recentLogs.length === 0) {
+        logsEl.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No recent activity</div></div>`;
+      } else {
+        logsEl.innerHTML = d.recentLogs.map(l => `
+          <div class="log-item">
+            <div class="log-dot ${l.action.toLowerCase()}"></div>
+            <div class="log-content">
+              <div class="log-action">${l.action} ${l.exam_date ? '— ' + l.exam_date : ''} ${l.session ? '(' + l.session + ')' : ''}</div>
+              <div class="log-detail">${l.details || ''}</div>
+            </div>
+            <div class="log-time">${formatTime(l.performed_at)}</div>
+          </div>`).join('');
+      }
+    } catch (err) {
+      if (err.message.includes('Invalid') || err.message.includes('expired')) logout();
+    }
+  }
+
+  // ── Upload ──
+  function fileSelected(input) {
+    const name = input.files[0]?.name || 'Click to choose file';
+    document.getElementById('upload-file-name').textContent = name;
+  }
+
+  function clearUploadForm() {
+    document.getElementById('upload-date').value = '';
+    document.getElementById('upload-session').value = '';
+    document.getElementById('upload-file').value = '';
+    document.getElementById('upload-file-name').textContent = 'Click to choose file or drag & drop';
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('upload-success').style.display = 'none';
+    document.getElementById('upload-error').style.display = 'none';
+  }
+
+  async function uploadPlan() {
+    const date = document.getElementById('upload-date').value;
+    const session = document.getElementById('upload-session').value;
+    const file = document.getElementById('upload-file').files[0];
+    const active = document.getElementById('upload-active').checked ? '1' : '0';
+    const btn = document.getElementById('upload-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const successEl = document.getElementById('upload-success');
+    const errorEl = document.getElementById('upload-error');
+
+    successEl.style.display = 'none';
+    errorEl.style.display = 'none';
+
+    if (!date || !session || !file) {
+      showEl(errorEl, 'Please fill all fields and select a file.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Uploading & Parsing…';
+    progressBar.style.display = 'block';
+
+    const formData = new FormData();
+    formData.append('exam_date', date);
+    formData.append('session', session);
+    formData.append('file', file);
+    formData.append('active', active);
+
+    try {
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+      showEl(successEl, `✅ ${data.message}`);
+      document.getElementById('upload-preview').style.display = 'block';
+      document.getElementById('preview-stats').innerHTML = `
+        <div class="result-item"><div class="result-item-label">Students</div><div class="result-item-value">${data.total_records.toLocaleString()}</div></div>
+        <div class="result-item"><div class="result-item-label">Rooms</div><div class="result-item-value">${data.rooms}</div></div>
+        <div class="result-item"><div class="result-item-label">Upload ID</div><div class="result-item-value">#${data.upload_id}</div></div>
+        ${data.skipped_sheets?.length ? `<div class="result-item" style="grid-column:1/-1"><div class="result-item-label">Skipped Sheets</div><div class="result-item-value" style="font-size:11px;color:var(--muted)">${data.skipped_sheets.join(', ')}</div></div>` : ''}
+      `;
+    } catch (err) {
+      showEl(errorEl, `❌ ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '📤 Upload & Parse';
+      progressBar.style.display = 'none';
+    }
+  }
+
+  // ── Plans ──
+  async function loadPlans() {
+    const tbody = document.getElementById('plans-tbody');
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">Loading...</td></tr>`;
+    try {
+      const plans = await api('/api/admin/uploads');
+      if (plans.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:60px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">📭</div>No plans uploaded yet</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = plans.map(p => `
+        <tr>
+          <td><span class="mono">${p.exam_date}</span></td>
+          <td><span class="badge badge-${p.session === 'Morning' ? 'morning' : 'evening'}">${p.session === 'Morning' ? '🌅' : '🌆'} ${p.session}</span></td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.file_name}">${p.file_name}</td>
+          <td><span class="mono">${(p.student_count || p.total_students || 0).toLocaleString()}</span></td>
+          <td style="color:var(--muted);font-size:12px">${formatTime(p.uploaded_at)}</td>
+          <td>
+            <span class="badge ${p.active ? 'badge-success' : 'badge-danger'}">
+              ${p.active ? '● Active' : '○ Inactive'}
+            </span>
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost" onclick="togglePlan(${p.id}, this)" style="font-size:11px;padding:6px 10px">
+                ${p.active ? '⏸ Deactivate' : '▶ Activate'}
+              </button>
+              <button class="btn btn-danger" onclick="deletePlan(${p.id}, '${p.exam_date} ${p.session}')" style="font-size:11px;padding:6px 10px">
+                🗑
+              </button>
+            </div>
+          </td>
+        </tr>`).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--danger)">${err.message}</td></tr>`;
+    }
+  }
+
+  async function togglePlan(id, btn) {
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      await api(`/api/admin/uploads/${id}/toggle`, 'PATCH');
+      loadPlans();
+    } catch (err) { alert(err.message); btn.disabled = false; }
+  }
+
+  async function deletePlan(id, label) {
+    if (!confirm(`Delete plan "${label}"?\nThis will permanently remove all seating records.`)) return;
+    try {
+      await api(`/api/admin/uploads/${id}`, 'DELETE');
+      loadPlans();
+    } catch (err) { alert(err.message); }
+  }
+
+  // ── Admin Search ──
+  async function adminSearch() {
+    const enroll = document.getElementById('admin-search-enroll').value.trim();
+    const date = document.getElementById('admin-search-date').value;
+    const resultEl = document.getElementById('admin-search-result');
+
+    if (!enroll) { resultEl.innerHTML = `<div class="alert alert-danger" style="display:block">Enter an enrollment number</div>`; return; }
+
+    resultEl.innerHTML = `<div style="padding:20px;color:var(--muted);text-align:center">Searching…</div>`;
+
+    try {
+      const params = new URLSearchParams({ enrollment: enroll });
+      if (date) params.append('date', date);
+      const results = await api(`/api/admin/search?${params}`);
+
+      if (results.length === 0) {
+        resultEl.innerHTML = `<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--muted)">No records found for <strong>${enroll}</strong></div></div>`;
+        return;
+      }
+
+      resultEl.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" style="color:var(--success)">✅ Found ${results.length} record(s)</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Enrollment</th><th>Room</th><th>Row</th><th>Seat</th><th>Date</th><th>Session</th><th>Status</th></tr></thead>
+              <tbody>${results.map(r => `
+                <tr>
+                  <td class="mono">${r.enrollment}</td>
+                  <td><strong>${r.room_number}</strong></td>
+                  <td>${r.row_number || '—'}</td>
+                  <td>${r.seat_number ? '#' + r.seat_number : '—'}</td>
+                  <td class="mono">${r.exam_date}</td>
+                  <td><span class="badge badge-${r.session === 'Morning' ? 'morning' : 'evening'}">${r.session}</span></td>
+                  <td><span class="badge ${r.active ? 'badge-success' : 'badge-danger'}">${r.active ? 'Active' : 'Inactive'}</span></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    } catch (err) {
+      resultEl.innerHTML = `<div class="alert alert-danger" style="display:block">${err.message}</div>`;
+    }
+  }
+
+  // ── Logs ──
+  async function loadLogs() {
+    const el = document.getElementById('logs-body');
+    el.innerHTML = 'Loading…';
+    try {
+      const logs = await api('/api/admin/logs');
+      if (logs.length === 0) {
+        el.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">No activity logged yet</div></div>`;
+        return;
+      }
+      el.innerHTML = logs.map(l => `
+        <div class="log-item">
+          <div class="log-dot ${l.action.toLowerCase()}"></div>
+          <div class="log-content">
+            <div class="log-action">${l.action} ${l.exam_date ? '— ' + l.exam_date : ''} ${l.session || ''}</div>
+            <div class="log-detail">${l.details || ''} · by <strong>${l.performed_by || 'system'}</strong></div>
+          </div>
+          <div class="log-time">${formatTime(l.performed_at)}</div>
+        </div>`).join('');
+    } catch(e) { el.textContent = 'Failed to load logs.'; }
+  }
+
+  // ── Settings ──
+  async function loadSettings() {
+    try {
+      const s = await api('/api/admin/settings');
+      document.getElementById('set-portal-title').value = s.portal_title || '';
+      document.getElementById('set-institution').value = s.institution_name || '';
+      document.getElementById('set-contact').value = s.contact_info || '';
+      document.getElementById('set-not-found').value = s.not_found_message || '';
+    } catch(e) {}
+  }
+
+  async function saveSettings() {
+    const pairs = [
+      ['portal_title', document.getElementById('set-portal-title').value],
+      ['institution_name', document.getElementById('set-institution').value],
+      ['contact_info', document.getElementById('set-contact').value],
+      ['not_found_message', document.getElementById('set-not-found').value]
+    ];
+    const s = document.getElementById('settings-success');
+    const e = document.getElementById('settings-error');
+    s.style.display = 'none'; e.style.display = 'none';
+
+    try {
+      for (const [key, value] of pairs) {
+        await api('/api/admin/settings', 'POST', { key, value });
+      }
+      showEl(s, '✅ Settings saved successfully!');
+    } catch(err) { showEl(e, err.message); }
+  }
+
+  // ── Change Password ──
+  async function changePassword() {
+    const current = document.getElementById('pwd-current').value;
+    const newPwd = document.getElementById('pwd-new').value;
+    const confirm = document.getElementById('pwd-confirm').value;
+    const s = document.getElementById('pwd-success');
+    const e = document.getElementById('pwd-error');
+    s.style.display = 'none'; e.style.display = 'none';
+
+    if (!current || !newPwd || !confirm) { showEl(e, 'All fields are required.'); return; }
+    if (newPwd !== confirm) { showEl(e, 'New passwords do not match.'); return; }
+    if (newPwd.length < 6) { showEl(e, 'Password must be at least 6 characters.'); return; }
+
+    try {
+      await api('/api/admin/change-password', 'POST', { current_password: current, new_password: newPwd });
+      showEl(s, '✅ Password changed successfully! Please log in again.');
+      ['pwd-current','pwd-new','pwd-confirm'].forEach(id => document.getElementById(id).value = '');
+      setTimeout(logout, 2000);
+    } catch (err) { showEl(e, err.message); }
+  }
+
+  // ── Helpers ──
+  function showEl(el, msg) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 6000); }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function formatTime(ts) {
+    if (!ts) return '—';
+    const dt = new Date(ts);
+    return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) + ' ' +
+           dt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Enter key for search
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('page-search').classList.contains('active')) adminSearch();
+  });
+
+  init();
+</script>
+</body>
+</html>

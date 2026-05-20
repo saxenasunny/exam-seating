@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exam Seating Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy: #0b1d3a;
+      --navy-mid: #112446;
+      --navy-light: #1a3260;
+      --gold: #c9a227;
+      --gold-light: #e8c45a;
+      --cream: #faf8f3;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --success: #059669;
+      --error: #dc2626;
+      --card: #ffffff;
+      --border: rgba(201,162,39,0.2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Background Pattern ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(201,162,39,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(26,50,96,0.6) 0%, transparent 50%),
+        repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.01) 60px, rgba(255,255,255,0.01) 61px),
+        repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.01) 60px, rgba(255,255,255,0.01) 61px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 28px 24px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(201,162,39,0.15);
+      background: rgba(11,29,58,0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 16px rgba(201,162,39,0.3);
+    }
+
+    .logo-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: 0.3px;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .admin-link {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    .admin-link:hover { color: var(--gold); border-color: var(--gold); }
+
+    /* ── Main ── */
+    main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,162,39,0.12);
+      border: 1px solid rgba(201,162,39,0.3);
+      color: var(--gold-light);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 7vw, 58px);
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-title span { color: var(--gold); }
+
+    .hero-sub {
+      color: rgba(255,255,255,0.5);
+      font-size: 15px;
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    /* ── Search Card ── */
+    .search-card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 24px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow:
+        0 0 0 1px rgba(201,162,39,0.15),
+        0 24px 80px rgba(0,0,0,0.5),
+        0 4px 20px rgba(201,162,39,0.1);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .card-header-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--navy), var(--navy-light));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .card-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .required-badge {
+      display: inline-block;
+      background: rgba(201,162,39,0.15);
+      color: var(--gold);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: #fafafa;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus {
+      border-color: var(--navy-light);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(11,29,58,0.08);
+    }
+
+    input[type="text"]::placeholder { color: #9ca3af; font-size: 14px; }
+
+    .date-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .search-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(201,162,39,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .search-btn:hover::before { left: 100%; }
+    .search-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(11,29,58,0.4); }
+    .search-btn:active { transform: translateY(0); }
+    .search-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result Panel ── */
+    #result { margin-top: 20px; }
+
+    .result-success {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 2px solid #86efac;
+      border-radius: 16px;
+      padding: 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .result-error {
+      background: linear-gradient(135deg, #fff7f7, #fee2e2);
+      border: 2px solid #fca5a5;
+      border-radius: 16px;
+      padding: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .result-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .result-success .result-icon { background: #bbf7d0; }
+    .result-error .result-icon { background: #fecaca; }
+
+    .result-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .result-success .result-title { color: #065f46; }
+    .result-error .result-title { color: #991b1b; }
+
+    .seat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .seat-item {
+      background: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .seat-item-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .seat-item-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #065f46;
+      line-height: 1;
+    }
+
+    .seat-item.full-width { grid-column: 1 / -1; }
+
+    .error-msg {
+      color: #7f1d1d;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      padding: 20px 16px;
+      color: rgba(255,255,255,0.25);
+      font-size: 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    footer a { color: rgba(201,162,39,0.5); text-decoration: none; }
+
+    /* ── Info Banner ── */
+    .info-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(201,162,39,0.08);
+      border: 1px solid rgba(201,162,39,0.15);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-top: 16px;
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 540px) {
+      .search-card { padding: 28px 22px; border-radius: 20px; }
+      .hero-title { font-size: 32px; }
+      header { padding: 18px 16px; }
+      .logo-text h1 { font-size: 16px; }
+      .seat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-text">
+      <h1 id="site-title">Exam Seating Portal</h1>
+      <p id="institution-name">Examination Cell</p>
+    </div>
+  </div>
+  <a href="/admin" class="admin-link">Admin ↗</a>
+</header>
+
+<main>
+  <div class="hero-badge">Live Search Available</div>
+
+  <h2 class="hero-title">Find Your<br/><span>Seat Assignment</span></h2>
+  <p class="hero-sub">Enter your enrollment number to instantly locate your exam room and seat details.</p>
+
+  <div class="search-card">
+    <div class="card-header">
+      <div class="card-header-icon">🔍</div>
+      <h2>Search Seating</h2>
+    </div>
+
+    <div class="form-group">
+      <label>Enrollment Number <span class="required-badge">REQUIRED</span></label>
+      <input
+        type="text"
+        id="enrollment"
+        placeholder="e.g. 240160226002"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Exam Date <small style="font-size:10px;color:#9ca3af;font-weight:400;text-transform:none">(optional — defaults to today)</small></label>
+      <input type="date" id="exam-date"/>
+      <p class="date-hint">ℹ️ Leave blank to search today's seating plan</p>
+    </div>
+
+    <button class="search-btn" id="search-btn" onclick="searchSeat()">
+      <div class="spinner" id="spinner"></div>
+      <span id="btn-text">🔍 &nbsp;Find My Seat</span>
+    </button>
+
+    <div id="result"></div>
+  </div>
+
+  <div class="info-strip" id="contact-strip" style="display:none;">
+    📞 <span id="contact-info-text"></span>
+  </div>
+</main>
+
+<footer>
+  <p>Secure Exam Seating System &nbsp;·&nbsp; <a href="/admin">Admin Login</a></p>
+</footer>
+
+<script>
+  // Load public settings
+  fetch('/api/settings/public')
+    .then(r => r.json())
+    .then(s => {
+      if (s.portal_title) { document.title = s.portal_title; document.getElementById('site-title').textContent = s.portal_title; }
+      if (s.institution_name) document.getElementById('institution-name').textContent = s.institution_name;
+      if (s.contact_info) {
+        document.getElementById('contact-info-text').textContent = s.contact_info;
+        document.getElementById('contact-strip').style.display = 'flex';
+      }
+    }).catch(() => {});
+
+  // Allow Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') searchSeat(); });
+
+  async function searchSeat() {
+    const enroll = document.getElementById('enrollment').value.trim();
+    const date = document.getElementById('exam-date').value;
+    const resultDiv = document.getElementById('result');
+    const btn = document.getElementById('search-btn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+
+    if (!enroll) {
+      resultDiv.innerHTML = `<div class="result-error"><div class="result-header"><div class="result-icon">⚠️</div><div class="result-title">Input Required</div></div><p class="error-msg">Please enter your enrollment number to search.</p></div>`;
+      document.getElementById('enrollment').focus();
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Searching…';
+    resultDiv.innerHTML = '';
+
+    try {
+      const params = new URLSearchParams({ enrollment: enroll });
+      if (date) params.append('date', date);
+      const res = await fetch(`/api/search?${params}`);
+      const data = await res.json();
+
+      if (data.found) {
+        resultDiv.innerHTML = `
+          <div class="result-success">
+            <div class="result-header">
+              <div class="result-icon">✅</div>
+              <div class="result-title">Seat Found!</div>
+            </div>
+            <div class="seat-grid">
+              <div class="seat-item">
+                <div class="seat-item-label">Room No.</div>
+                <div class="seat-item-value">${data.room_number}</div>
+              </div>
+              <div class="seat-item">
+                <div class="seat-item-label">Row No.</div>
+                <div class="seat-item-value">${data.row_number || '—'}</div>
+              </div>
+              <div class="seat-item">
+                <div class="seat-item-label">Seat No.</div>
+                <div class="seat-item-value">${data.seat_number ? '#' + data.seat_number : '—'}</div>
+              </div>
+              <div class="seat-item">
+                <div class="seat-item-label">Session</div>
+                <div class="seat-item-value">${data.session || '—'}</div>
+              </div>
+              <div class="seat-item full-width">
+                <div class="seat-item-label">Exam Date</div>
+                <div class="seat-item-value" style="font-size:17px">${formatDate(data.exam_date)}</div>
+              </div>
+              <div class="seat-item full-width">
+                <div class="seat-item-label">Enrollment Number</div>
+                <div class="seat-item-value" style="font-size:16px;letter-spacing:1px">${data.enrollment}</div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="result-error">
+            <div class="result-header">
+              <div class="result-icon">❌</div>
+              <div class="result-title">Not Found</div>
+            </div>
+            <p class="error-msg">${data.message || 'Enrollment number not found.'}</p>
+          </div>`;
+      }
+    } catch {
+      resultDiv.innerHTML = `<div class="result-error"><div class="result-header"><div class="result-icon">⚠️</div><div class="result-title">Connection Error</div></div><p class="error-msg">Unable to connect to the server. Please try again.</p></div>`;
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.innerHTML = '🔍 &nbsp;Find My Seat';
+    }
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+</script>
+</body>
+</html>
